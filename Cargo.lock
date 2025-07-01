@@ -2940,6 +2940,7 @@ dependencies = [
  "actix-web",
  "derive_more",
  "serde",
+ "serde_json",
  "solana-program",
  "solana-sdk",
  "spl-token",
