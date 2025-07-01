@@ -1,6 +1,6 @@
+use actix_web::{error, http::StatusCode, HttpResponse};
 use serde::Serialize;
 use serde_json::Value;
-use actix_web::{error, http::{StatusCode}, HttpResponse};
 use std::fmt::{Display, Formatter};
 
 #[derive(Serialize)]
@@ -10,10 +10,10 @@ pub struct Response {
 }
 
 impl Response {
-    pub fn success<T: Serialize>(data: T) -> Self {
+    pub fn new<T: Serialize>(data: T) -> Self {
         Self {
             success: true,
-            data: serde_json::to_value(data).unwrap_or(Value::Null)
+            data: serde_json::to_value(data).unwrap_or(Value::Null),
         }
     }
 }
@@ -21,7 +21,7 @@ impl Response {
 #[derive(Debug, Serialize)]
 pub struct ErrorMessage {
     success: bool,
-    error: String
+    error: String,
 }
 
 impl Display for ErrorMessage {
@@ -41,10 +41,10 @@ impl error::ResponseError for ErrorMessage {
 }
 
 impl ErrorMessage {
-    pub fn error(error: String) -> Self {
+    pub fn new(error: String) -> Self {
         Self {
             success: false,
-            error
+            error,
         }
     }
 }
