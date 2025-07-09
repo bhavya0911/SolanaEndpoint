@@ -44,12 +44,16 @@ async fn create_token(
             ));
         }
     };
+    let decimals = info.decimals;
+    if decimals == 0 {
+        return Err(ErrorMessage::new("decimals cannot be zero".to_string()));
+    }
     let transaction = spl_token::instruction::initialize_mint(
         &spl_token::id(),
         &mint,
         &mint_authority,
         Some(&mint_authority),
-        info.decimals,
+        decimals,
     );
     let response = token_create::Response {
         program_id: transaction.clone().unwrap().program_id.to_string(),
@@ -83,13 +87,17 @@ async fn mint_token(info: web::Json<token_mint::Request>) -> Result<impl Respond
             ));
         }
     };
+    let amount = info.amount;
+    if amount == 0 {
+        return Err(ErrorMessage::new("amount cannot be zero".to_string()));
+    }
     let transaction = spl_token::instruction::mint_to(
         &spl_token::id(),
         &mint,
         &destination,
         &authority,
         &[&authority],
-        info.amount,
+        amount,
     );
     let response = token_mint::Response {
         program_id: transaction.clone().unwrap().program_id.to_string(),
@@ -162,7 +170,13 @@ async fn sol_send(info: web::Json<send_sol::Request>) -> Result<impl Responder, 
             return Err(ErrorMessage::new("to PubKey is not valid".to_string()));
         }
     };
-    let transaction = system_instruction::transfer(&from, &to, info.lamports);
+    let lamports = info.lamports;
+    if lamports == 0 {
+        return Err(ErrorMessage::new(
+            "lamports must be greater than 0".to_string(),
+        ));
+    }
+    let transaction = system_instruction::transfer(&from, &to, lamports);
     let response = send_sol::Response {
         program_id: transaction.program_id.to_string(),
         accounts: [from.to_string(), to.to_string()],
@@ -185,13 +199,19 @@ async fn token_send(info: web::Json<send_token::Request>) -> Result<impl Respond
         Ok(pubkey) => pubkey,
         Err(_) => return Err(ErrorMessage::new("owner pubkey is not valid".to_string())),
     };
+    let amount = info.amount;
+    if amount == 0 {
+        return Err(ErrorMessage::new(
+            "amount must be greater than 0".to_string(),
+        ));
+    }
     let transaction = spl_token::instruction::transfer(
         &spl_token::id(),
         &owner,
         &destination,
         &owner,
         &[&owner],
-        info.amount,
+        amount,
     );
     let response = send_token::Response {
         program_id: transaction.clone().unwrap().program_id.to_string(),
